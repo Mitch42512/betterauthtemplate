@@ -27,7 +27,7 @@ export const account = pgTable("account", {
   accessTokenExpiresAt: timestamp("accessTokenExpiresAt"),
   refreshTokenExpiresAt: timestamp("refreshTokenExpiresAt"),
   scope: varchar("scope", { length: 255 }),
-  password: varchar("password", { length: 255 }).notNull(),
+  password: varchar("password", { length: 255 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });

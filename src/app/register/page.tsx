@@ -28,7 +28,7 @@ export default function RegisterPage() {
       const { data, error } = await authClient.signUp.email({
         email,
         password,
-        ...(name && { name }), // ✅ only include name if it has a value
+        name: name || "", // Provide empty string if name is not provided
       });
 
       console.log("Sign-up response:", { data, error });
@@ -43,7 +43,8 @@ export default function RegisterPage() {
           setError(error.message || "Registration failed.");
         }
       } else {
-        router.push("/dashboard");
+        // After successful registration, redirect to 2FA setup
+        router.push("/login/2fa?setup=true");
       }
     } catch (err) {
       setError("An unexpected error occurred");
@@ -69,6 +70,7 @@ export default function RegisterPage() {
             </a>
           </p>
         </div>
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>

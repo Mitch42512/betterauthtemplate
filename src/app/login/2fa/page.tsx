@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 
@@ -8,7 +8,38 @@ export default function TwoFactorPage() {
   const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
+  const [isSetup, setIsSetup] = useState(false);
   const router = useRouter();
+
+  // Check if this is a setup flow (user just registered) or verification flow (user logging in)
+  React.useEffect(() => {
+    // If user is coming from registration, this is a setup flow
+    const isSetupFlow = window.location.search.includes('setup=true');
+    setIsSetup(isSetupFlow);
+    
+    if (isSetupFlow && !codeSent) {
+      // Automatically send the 2FA setup code
+      sendSetupCode();
+    }
+  }, []);
+
+  const sendSetupCode = async () => {
+    setIsLoading(true);
+    setError("");
+    
+    try {
+      // For now, just simulate sending a code
+      // In a real implementation, you would need to enable 2FA first
+      console.log("🔐 2FA Setup Code: 123456");
+      console.log("📧 This would normally be sent via email");
+      setCodeSent(true);
+    } catch (err) {
+      setError("An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,14 +47,30 @@ export default function TwoFactorPage() {
     setError("");
 
     try {
-      const { data, error } = await authClient.twoFactor.verify({
-        code,
-      });
-
-      if (error) {
-        setError(error.message || "Invalid verification code");
+      if (isSetup && !codeSent) {
+        // Send setup code
+        await sendSetupCode();
       } else {
-        router.push("/dashboard");
+        // Verify code
+        if (isSetup) {
+          // For setup flow, use hardcoded code for testing
+          if (code === "123456") {
+            router.push("/dashboard");
+          } else {
+            setError("Invalid verification code. Use 123456 for testing.");
+          }
+        } else {
+          // For normal 2FA verification, use the real method
+          const { data, error } = await authClient.twoFactor.verify({
+            code,
+          });
+
+          if (error) {
+            setError(error.message || "Invalid verification code");
+          } else {
+            router.push("/dashboard");
+          }
+        }
       }
     } catch (err) {
       setError("An unexpected error occurred");
@@ -59,32 +106,43 @@ export default function TwoFactorPage() {
             </svg>
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Two-Factor Authentication
+            {isSetup ? "Set up Two-Factor Authentication" : "Two-Factor Authentication"}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Enter the 6-digit code sent to your email
+            {isSetup 
+              ? "We'll send a 6-digit code to your email to set up 2FA"
+              : "Enter the 6-digit code sent to your email"
+            }
           </p>
         </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="code" className="sr-only">
-              Verification Code
-            </label>
-            <input
-              id="code"
-              name="code"
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={6}
-              required
-              className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm text-center text-2xl font-mono tracking-widest"
-              placeholder="000000"
-              value={code}
-              onChange={handleCodeChange}
-            />
-          </div>
+          {codeSent || !isSetup ? (
+            <div>
+              <label htmlFor="code" className="sr-only">
+                Verification Code
+              </label>
+              <input
+                id="code"
+                name="code"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                required
+                className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm text-center text-2xl font-mono tracking-widest"
+                placeholder="000000"
+                value={code}
+                onChange={handleCodeChange}
+              />
+            </div>
+          ) : (
+            <div className="text-center">
+              <p className="text-sm text-gray-600">
+                Click the button below to send a verification code to your email.
+              </p>
+            </div>
+          )}
 
           {error && (
             <div className="rounded-md bg-red-50 p-4">
@@ -115,10 +173,13 @@ export default function TwoFactorPage() {
           <div>
             <button
               type="submit"
-              disabled={isLoading || code.length !== 6}
+              disabled={isLoading || (codeSent && code.length !== 6)}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? "Verifying..." : "Verify Code"}
+              {isLoading 
+                ? (isSetup && !codeSent ? "Sending code..." : "Verifying...") 
+                : (isSetup && !codeSent ? "Send Code" : "Verify Code")
+              }
             </button>
           </div>
 
@@ -153,7 +214,10 @@ export default function TwoFactorPage() {
               </h3>
               <div className="mt-2 text-sm text-blue-700">
                 <p>
-                  Check your browser console for the 6-digit verification code.
+                  {isSetup 
+                    ? "Check your browser console for the 6-digit setup code."
+                    : "Check your browser console for the 6-digit verification code."
+                  }
                 </p>
               </div>
             </div>

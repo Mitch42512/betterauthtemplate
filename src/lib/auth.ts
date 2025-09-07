@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { twoFactor } from "better-auth/plugins";
+import { twoFactor, emailOTP } from "better-auth/plugins";
 import { db } from "@/db"; // your Drizzle connection
 import * as schema from "@/db/schema";
 
@@ -10,6 +10,21 @@ export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "pg", schema }),
   emailAndPassword: { enabled: true },            // basic email/password flow
   plugins: [
+    emailOTP({
+      async sendVerificationOTP({ email, otp, type }) {
+        // For now, just log the code to console
+        // TODO: Replace with real email provider like Resend/SendGrid
+        console.log(`📧 Send OTP ${otp} to ${email} for ${type}`);
+        console.log(`📧 This would normally be sent via email to: ${email}`);
+        
+        // In production, you would send the email here:
+        // await sendEmail({
+        //   to: email,
+        //   subject: "Your Login Code",
+        //   body: `Your verification code is: ${otp}`
+        // });
+      },
+    }),
     twoFactor({
       issuer: "Better Auth Template",
       sendCode: async ({ code, email }) => {
