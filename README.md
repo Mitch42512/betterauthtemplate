@@ -1,36 +1,154 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Better Auth Template
 
-## Getting Started
+A production-ready authentication template built with Next.js, Better Auth, Drizzle ORM, and PostgreSQL. Features complete email/password authentication with two-factor authentication (2FA) support.
 
-First, run the development server:
+## 🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Complete Authentication System**: Email/password login and registration
+- **Two-Factor Authentication**: Email-based 2FA with 6-digit codes
+- **Protected Routes**: Session-based route protection
+- **Database Integration**: Drizzle ORM with PostgreSQL
+- **TypeScript**: Full type safety throughout
+- **Beautiful UI**: Tailwind CSS styling
+- **Production Ready**: Environment variable configuration
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 15 with App Router
+- **Authentication**: Better Auth
+- **Database**: PostgreSQL with Drizzle ORM
+- **Styling**: Tailwind CSS
+- **Language**: TypeScript
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+ 
+- PostgreSQL database
+- npm, yarn, pnpm, or bun
+
+### Installation
+
+1. **Clone and install dependencies:**
+   ```bash
+   git clone <your-repo-url>
+   cd betterauthtemplate
+   npm install
+   ```
+
+2. **Set up environment variables:**
+   Create a `.env.local` file in the root directory:
+   ```bash
+   # Database connection
+   DATABASE_URL=postgresql://postgres:password@localhost:5432/betterauthtemplate
+   
+   # Better Auth Configuration
+   BETTER_AUTH_SECRET=your-super-secret-key-here-change-this-in-production
+   BETTER_AUTH_URL=http://localhost:3000
+   ```
+
+3. **Set up the database:**
+   ```bash
+   # Create your PostgreSQL database
+   createdb betterauthtemplate
+   
+   # Push the schema to create tables
+   npm run db:push
+   ```
+
+4. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
+
+5. **Open your browser:**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## 🔐 Testing Two-Factor Authentication
+
+1. **Register a new account:**
+   - Go to `/register`
+   - Fill in your details and create an account
+
+2. **Log in with 2FA:**
+   - Go to `/login`
+   - Enter your email and password
+   - You'll be redirected to `/login/2fa`
+
+3. **Get your verification code:**
+   - Check your browser console (F12 → Console tab)
+   - Look for the 6-digit code that was logged
+
+4. **Complete authentication:**
+   - Enter the 6-digit code on the 2FA page
+   - You'll be redirected to the protected dashboard
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/auth/[...all]/     # Auth API routes
+│   ├── login/                 # Login pages
+│   │   └── 2fa/              # 2FA verification
+│   ├── register/              # Registration page
+│   ├── dashboard/             # Protected dashboard
+│   └── page.tsx              # Home page
+├── lib/
+│   ├── auth.ts               # Better Auth configuration
+│   └── auth-client.ts        # Auth client utilities
+├── db/
+│   ├── index.ts              # Database connection
+│   ├── schema.ts             # Database schema
+│   └── utils.ts              # Database utilities
+└── types/
+    └── env.d.ts              # Environment variable types
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Available Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run db:push` - Push database schema changes
+- `npm run db:studio` - Open Drizzle Studio
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🔧 Configuration
 
-## Learn More
+### Email Provider Setup
 
-To learn more about Next.js, take a look at the following resources:
+Currently, 2FA codes are logged to the console for development. To use a real email provider:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Install your preferred email service** (e.g., Resend, SendGrid)
+2. **Update `src/lib/auth.ts`:**
+   ```typescript
+   sendCode: async ({ code, email }) => {
+     await sendEmail({
+       to: email,
+       subject: "Your 2FA Code",
+       body: `Your verification code is: ${code}`
+     });
+   }
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Database Management
 
-## Deploy on Vercel
+- **View your data**: `npm run db:studio`
+- **Reset database**: Drop and recreate your PostgreSQL database, then run `npm run db:push`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🚀 Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This template is ready for deployment on platforms like Vercel, Railway, or any Node.js hosting service. Make sure to:
+
+1. Set up a PostgreSQL database
+2. Configure environment variables
+3. Update `BETTER_AUTH_URL` to your production domain
+4. Set up a real email provider for 2FA codes
+
+## 📚 Learn More
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Better Auth Documentation](https://www.better-auth.com)
+- [Drizzle ORM Documentation](https://orm.drizzle.team)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
