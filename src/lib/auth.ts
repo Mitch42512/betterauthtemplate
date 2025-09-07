@@ -11,6 +11,7 @@ export const auth = betterAuth({
   emailAndPassword: { enabled: true },            // basic email/password flow
   plugins: [
     emailOTP({
+      disableSignUp: true, // Prevent automatic user creation during email OTP
       async sendVerificationOTP({ email, otp, type }) {
         // For now, just log the code to console
         // TODO: Replace with real email provider like Resend/SendGrid

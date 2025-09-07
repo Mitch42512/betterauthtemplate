@@ -30,7 +30,7 @@ export default function LoginPage() {
       if (error) {
         // Check if 2FA is required
         if (error.code === "2FA_REQUIRED") {
-          router.push("/login/2fa");
+          router.push(`/login/2fa?email=${encodeURIComponent(email)}`);
           return;
         }
         setError(error.message || "Login failed");
@@ -51,26 +51,59 @@ export default function LoginPage() {
 
     try {
       if (!codeSent) {
-        // Send OTP
-        const { error } = await authClient.emailOtp.sendVerificationOtp({ 
-          email,
-          type: "sign-in"
+        // First check if user exists before sending OTP
+        const userCheckResponse = await fetch("/api/check-user", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
         });
+
+        const userCheckData = await userCheckResponse.json();
+
+        if (!userCheckData.exists) {
+          setError("User not identified. Please create an account first.");
+          setIsLoading(false);
+          return;
+        }
+
+        // Send OTP only if user exists using direct API call
+        const otpResponse = await fetch("/api/auth/email-otp/send-verification-otp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ 
+            email,
+            type: "sign-in"
+          }),
+        });
+
+        const otpData = await otpResponse.json();
         
-        if (error) {
-          setError(error.message || "Failed to send code");
+        if (!otpResponse.ok) {
+          setError(otpData.message || "Failed to send code");
         } else {
           setCodeSent(true);
         }
       } else {
-        // Verify OTP
-        const { error } = await authClient.signIn.emailOtp({ 
-          email, 
-          otp: code 
+        // Verify OTP using direct API call
+        const verifyResponse = await fetch("/api/auth/sign-in/email-otp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ 
+            email, 
+            otp: code 
+          }),
         });
+
+        const verifyData = await verifyResponse.json();
         
-        if (error) {
-          setError(error.message || "Invalid code");
+        if (!verifyResponse.ok) {
+          setError(verifyData.message || "Invalid code");
         } else {
           router.push("/dashboard");
         }
