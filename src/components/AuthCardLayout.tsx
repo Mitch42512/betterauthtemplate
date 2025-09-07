@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import HomepageBackground from './HomepageBackground';
 
 interface AuthCardLayoutProps {
   title: string;
@@ -12,8 +13,18 @@ interface AuthCardLayoutProps {
 
 export default function AuthCardLayout({ title, subtitle, additionalText, children, footer }: AuthCardLayoutProps) {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="flex w-full max-w-7xl h-[900px] rounded-4xl shadow-xl overflow-hidden" style={{ maxWidth: '90rem' }}>
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Homepage Background with Blur */}
+      <div className="absolute inset-0">
+        <HomepageBackground />
+      </div>
+      
+      {/* Blur Overlay */}
+      <div className="absolute inset-0 backdrop-blur-sm bg-white/20"></div>
+      
+      {/* Content */}
+      <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
+        <div className="flex w-full max-w-7xl h-[900px] rounded-4xl shadow-2xl overflow-hidden backdrop-blur-md bg-white/90" style={{ maxWidth: '90rem' }}>
         {/* Left Panel */}
         <div className="w-[45%] bg-gradient-to-b from-yellow-50 to-white p-10 flex flex-col">
           {/* Logo */}
@@ -51,11 +62,11 @@ export default function AuthCardLayout({ title, subtitle, additionalText, childr
         </div>
 
                {/* Right Panel */}
-               <div className="w-[55%] bg-gradient-to-b from-yellow-50 to-white rounded-r-4xl p-8 flex items-center justify-center relative">
+               <div className="w-[55%] bg-gradient-to-b from-yellow-50/80 to-white/80 rounded-r-4xl p-8 flex items-center justify-center relative backdrop-blur-sm">
                  {/* Close Button */}
                  <Link 
                    href="/"
-                   className="absolute top-4 right-4 z-10 w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center shadow-sm transition-colors duration-200"
+                   className="absolute top-4 right-4 z-10 w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-sm transition-colors duration-200 backdrop-blur-sm"
                  >
                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -72,6 +83,7 @@ export default function AuthCardLayout({ title, subtitle, additionalText, childr
                    />
                  </div>
                </div>
+        </div>
       </div>
     </div>
   );
