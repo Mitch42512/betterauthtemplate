@@ -229,14 +229,17 @@ export default function Home() {
       </div>
 
       {/* Features Section */}
-      <div id="features-section" className="relative z-10">
-        {/* Feature 1 - Advanced Authentication (Image left, Text right) - Left margin, 400px from left */}
-        <div className="flex items-center px-8 py-16">
-          <div className="w-full max-w-5xl">
-            <div className="flex items-center gap-8" style={{marginLeft: '400px'}}>
-              {/* Image on the left */}
-              <div className="flex justify-start">
-                <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl h-72 w-80 flex items-center justify-center">
+      <div id="features-section" className="relative z-10 py-16">
+        {/* CSS Grid Container - Two equal columns with snaking pattern */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 max-w-7xl mx-auto px-8">
+          
+          {/* Left Column - Features 1 & 3 */}
+          <div className="flex flex-col">
+            {/* Feature 1 - Advanced Authentication (Image left, Text right) */}
+            <div className="flex items-center justify-center lg:justify-end pr-4 lg:pr-20 py-16">
+              <div className="flex flex-col lg:flex-row items-center gap-8 max-w-2xl lg:max-w-6xl">
+                {/* Image on the left */}
+                <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl h-104 w-110 lg:w-150 flex items-center justify-center">
                   <div className="text-center">
                     <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                       <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -246,10 +249,8 @@ export default function Home() {
                     <p className="text-gray-600 font-medium">Feature 1 Image</p>
                   </div>
                 </div>
-              </div>
-              {/* Text on the right */}
-              <div className="flex justify-start">
-                <div className="w-80">
+                {/* Text on the right */}
+                <div className="w-112"> {/*text box size*/}
                   <h2 className="text-4xl font-bold text-gray-800 mb-6">Advanced Authentication</h2>
                   <p className="text-lg text-gray-600 mb-6">
                     Secure your applications with our cutting-edge authentication system. 
@@ -279,68 +280,12 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Feature 2 - User Management (Text left, Image right) - Right margin, 20% from center - 50px padding from Feature 1 */}
-        <div className="flex items-center justify-end px-8" style={{paddingTop: '50px', paddingBottom: '50px'}}>
-          <div className="w-full max-w-5xl">
-            <div className="flex items-center gap-8">
-              {/* Text on the left */}
-              <div className="flex justify-start">
-                <div className="w-80">
-                  <h2 className="text-4xl font-bold text-gray-800 mb-6">User Management</h2>
-                  <p className="text-lg text-gray-600 mb-6">
-                    Comprehensive user management tools that make it easy to handle 
-                    user accounts, permissions, and roles. Built for scalability and 
-                    enterprise needs.
-                  </p>
-                  <ul className="space-y-3 text-gray-600">
-                    <li className="flex items-center">
-                      <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                      </svg>
-                      Role-based access control
-                    </li>
-                    <li className="flex items-center">
-                      <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                      </svg>
-                      User analytics dashboard
-                    </li>
-                    <li className="flex items-center">
-                      <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                      </svg>
-                      Bulk user operations
-                    </li>
-                  </ul>
-                </div>
-              </div>
-              {/* Image on the right */}
-              <div className="flex justify-start">
-                <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-2xl h-72 w-80 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                      </svg>
-                    </div>
-                    <p className="text-gray-600 font-medium">Feature 2 Image</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Feature 3 - API Integration (Image left, Text right) - Left margin, 400px from left */}
-        <div className="flex items-center px-8 py-16">
-          <div className="w-full max-w-5xl">
-            <div className="flex items-center gap-8" style={{marginLeft: '400px'}}>
-              {/* Image on the left */}
-              <div className="flex justify-start">
-                <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl h-72 w-80 flex items-center justify-center">
+            {/* Feature 3 - API Integration (Image left, Text right) - Staggered down based on text position */}
+            <div className="flex items-center justify-center lg:justify-end pr-4 lg:pr-20 py-16 mt-34">
+              <div className="flex flex-col lg:flex-row items-center gap-8 max-w-2xl lg:max-w-6xl">
+                {/* Image on the left */}
+                <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl h-104 w-110 lg:w-150 flex items-center justify-center">
                   <div className="text-center">
                     <div className="w-20 h-20 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
                       <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -350,10 +295,8 @@ export default function Home() {
                     <p className="text-gray-600 font-medium">Feature 3 Image</p>
                   </div>
                 </div>
-              </div>
-              {/* Text on the right */}
-              <div className="flex justify-start">
-                <div className="w-80">
+                {/* Text on the right */}
+                <div className="w-112"> {/*text box size*/}
                   <h2 className="text-4xl font-bold text-gray-800 mb-6">API Integration</h2>
                   <p className="text-lg text-gray-600 mb-6">
                     Seamlessly integrate with your existing systems using our powerful 
@@ -384,15 +327,60 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Feature 4 - Analytics & Insights (Text left, Image right) - Right margin, 20% from center - 50px padding from Feature 3 */}
-        <div className="flex items-center justify-end px-8" style={{paddingTop: '50px', paddingBottom: '50px'}}>
-          <div className="w-full max-w-5xl">
-            <div className="flex items-center gap-8">
-              {/* Text on the left */}
-              <div className="flex justify-start">
-                <div className="w-80">
+          {/* Right Column - Features 2 & 4 */}
+          <div className="flex flex-col">
+            {/* Feature 2 - User Management (Text left, Image right) - Staggered down from Feature 1 text */}
+            <div className="flex items-center justify-center lg:justify-start pl-4 lg:pl-20 py-16 mt-50">
+              <div className="flex flex-col lg:flex-row items-center gap-8 max-w-2xl lg:max-w-6xl">
+                {/* Text on the left */}
+                <div className="w-112"> {/*text box size*/}
+                  <h2 className="text-4xl font-bold text-gray-800 mb-6">User Management</h2>
+                  <p className="text-lg text-gray-600 mb-6">
+                    Comprehensive user management tools that make it easy to handle 
+                    user accounts, permissions, and roles. Built for scalability and 
+                    enterprise needs.
+                  </p>
+                  <ul className="space-y-3 text-gray-600">
+                    <li className="flex items-center">
+                      <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                      </svg>
+                      Role-based access control
+                    </li>
+                    <li className="flex items-center">
+                      <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                      </svg>
+                      User analytics dashboard
+                    </li>
+                    <li className="flex items-center">
+                      <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                      </svg>
+                      Bulk user operations
+                    </li>
+                  </ul>
+                </div>
+                {/* Image on the right */}
+                <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-2xl h-104 w-110 lg:w-150 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                      </svg>
+                    </div>
+                    <p className="text-gray-600 font-medium">Feature 2 Image</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Feature 4 - Analytics & Insights (Text left, Image right) - Staggered down from Feature 3 text */}
+            <div className="flex items-center justify-center lg:justify-start pl-4 lg:pl-20 py-16 mt-50">
+              <div className="flex flex-col lg:flex-row items-center gap-8 max-w-2xl lg:max-w-6xl">
+                {/* Text on the left */}
+                <div className="w-112"> {/*text box size*/}
                   <h2 className="text-4xl font-bold text-gray-800 mb-6">Analytics & Insights</h2>
                   <p className="text-lg text-gray-600 mb-6">
                     Get detailed insights into user behavior and system performance 
@@ -420,10 +408,8 @@ export default function Home() {
                     </li>
                   </ul>
                 </div>
-              </div>
-              {/* Image on the right */}
-              <div className="flex justify-start">
-                <div className="bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl h-72 w-80 flex items-center justify-center">
+                {/* Image on the right */}
+                <div className="bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl h-104 w-110 lg:w-150 flex items-center justify-center">
                   <div className="text-center">
                     <div className="w-20 h-20 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
                       <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
