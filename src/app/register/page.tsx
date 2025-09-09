@@ -28,27 +28,19 @@ export default function RegisterPage() {
     }
 
     try {
-      const { data, error } = await authClient.signUp.email({
+      // Instead of creating the user immediately, store the data temporarily
+      // and redirect to 2FA setup with the user data
+      const userData = {
         email,
         password,
-        name: name || "", // Provide empty string if name is not provided
-      });
+        name: name || "",
+      };
 
-      console.log("Sign-up response:", { data, error });
-
-      if (error) {
-        // Improved error handling
-        if (error.code === "FAILED_TO_CREATE_USER") {
-          setError("Failed to create user. Please check your inputs.");
-        } else if (error.message && error.message.toLowerCase().includes("password")) {
-          setError("There was a problem with the password.");
-        } else {
-          setError(error.message || "Registration failed.");
-        }
-      } else {
-        // After successful registration, redirect to 2FA setup
-        router.push("/login/2fa?setup=true");
-      }
+      // Store user data in sessionStorage for the 2FA process
+      sessionStorage.setItem('pendingUserData', JSON.stringify(userData));
+      
+      // Redirect to 2FA setup with user data
+      router.push(`/login/2fa?setup=true&email=${encodeURIComponent(email)}`);
     } catch (err) {
       setError("An unexpected error occurred");
     } finally {

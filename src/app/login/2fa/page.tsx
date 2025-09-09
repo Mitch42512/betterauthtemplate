@@ -29,13 +29,36 @@ export default function TwoFactorPage() {
     const isSetupFlow = window.location.search.includes('setup=true');
     setIsSetup(isSetupFlow);
     
-    if (isSetupFlow && !codeSent) {
-      // Automatically send the 2FA setup code
-      sendSetupCode();
+    if (isSetupFlow) {
+      // Check if we have pending user data
+      const pendingUserData = sessionStorage.getItem('pendingUserData');
+      if (!pendingUserData) {
+        setError("No pending registration found. Please start the registration process again.");
+        return;
+      }
+      
+      if (!codeSent) {
+        // Automatically send the 2FA setup code
+        sendSetupCode();
+      }
     } else if (emailParam && !isSetupFlow) {
       // For login flow, check if user exists before proceeding
       checkUserExists(emailParam);
     }
+
+    // Cleanup function to handle page unload
+    const handleBeforeUnload = () => {
+      // Only clear pending data if it's a setup flow and user is leaving
+      if (isSetupFlow) {
+        sessionStorage.removeItem('pendingUserData');
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, []);
 
   const checkUserExists = async (userEmail: string) => {
@@ -92,7 +115,38 @@ export default function TwoFactorPage() {
         if (isSetup) {
           // For setup flow, use hardcoded code for testing
           if (code === "123456") {
-            router.push("/dashboard");
+            // Get pending user data from sessionStorage
+            const pendingUserData = sessionStorage.getItem('pendingUserData');
+            
+            if (pendingUserData) {
+              try {
+                const userData = JSON.parse(pendingUserData);
+                
+                // Now create the user in the database
+                const { data, error } = await authClient.signUp.email({
+                  email: userData.email,
+                  password: userData.password,
+                  name: userData.name,
+                });
+
+                if (error) {
+                  setError("Failed to create user account. Please try again.");
+                  return;
+                }
+
+                // Clear the pending user data
+                sessionStorage.removeItem('pendingUserData');
+                
+                // Redirect to dashboard
+                router.push("/dashboard");
+              } catch (err) {
+                setError("Failed to create user account. Please try again.");
+                return;
+              }
+            } else {
+              setError("Registration data not found. Please start over.");
+              return;
+            }
           } else {
             setError("Invalid verification code. Use 123456 for testing.");
           }
@@ -127,15 +181,27 @@ export default function TwoFactorPage() {
     }
   };
 
+  const handleCancel = () => {
+    // Clear pending user data and redirect back to registration
+    sessionStorage.removeItem('pendingUserData');
+    router.push('/register');
+  };
+
   return (
     <AuthCardLayout 
       title="Verify your account"
       subtitle="Check your email for a verification code"
       footer={
         <div className="text-center">
-          <Link href="/login" className="text-xs text-gray-500 underline cursor-pointer hover:text-gray-700">
-            ← Back to Login
-          </Link>
+          {isSetup ? (
+            <Link href="/register" className="text-xs text-gray-500 underline cursor-pointer hover:text-gray-700">
+              ← Back to Registration
+            </Link>
+          ) : (
+            <Link href="/login" className="text-xs text-gray-500 underline cursor-pointer hover:text-gray-700">
+              ← Back to Login
+            </Link>
+          )}
         </div>
       }
     >
@@ -165,16 +231,28 @@ export default function TwoFactorPage() {
           </div>
         )}
 
-        <button
-          type="submit"
-          disabled={isLoading || (codeSent && code.length !== 6) || (!isSetup && !userExists)}
-          className="w-full h-12 rounded-full bg-yellow-400 hover:bg-yellow-500 text-white font-semibold focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading 
-            ? (isSetup && !codeSent ? "Sending code..." : "Verifying...") 
-            : (isSetup && !codeSent ? "Send Code" : "Submit")
-          }
-        </button>
+        <div className="space-y-3">
+          <button
+            type="submit"
+            disabled={isLoading || (codeSent && code.length !== 6) || (!isSetup && !userExists)}
+            className="w-full h-12 rounded-full bg-yellow-400 hover:bg-yellow-500 text-white font-semibold focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading 
+              ? (isSetup && !codeSent ? "Sending code..." : "Verifying...") 
+              : (isSetup && !codeSent ? "Send Code" : "Submit")
+            }
+          </button>
+          
+          {isSetup && (
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="w-full h-12 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+            >
+              Cancel Registration
+            </button>
+          )}
+        </div>
       </form>
 
       <div className="mt-6 p-4 bg-blue-50 rounded-md">
