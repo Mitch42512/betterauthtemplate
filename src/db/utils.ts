@@ -1,12 +1,12 @@
 import { eq } from 'drizzle-orm';
 import { db } from './index';
-import { user } from './schema';
+import { user, account } from './schema';
 
 // Example database operations
-export async function createUser(email: string, password: string, name?: string) {
+export async function createUser(id: string, email: string, name?: string) {
   const [newUser] = await db.insert(user).values({
+    id,
     email,
-    password,
     name,
   }).returning();
   
@@ -20,6 +20,18 @@ export async function getUserByEmail(email: string) {
 
 export async function getAllUsers() {
   return await db.select().from(user);
+}
+
+export async function createAccount(userId: string, accountId: string, providerId: string, password?: string) {
+  const [newAccount] = await db.insert(account).values({
+    id: accountId,
+    userId,
+    accountId,
+    providerId,
+    password,
+  }).returning();
+  
+  return newAccount;
 }
 
 // Re-export the database instance and schema
