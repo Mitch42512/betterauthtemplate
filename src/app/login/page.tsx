@@ -68,42 +68,26 @@ export default function LoginPage() {
           return;
         }
 
-        // Send OTP only if user exists using direct API call
-        const otpResponse = await fetch("/api/auth/email-otp/send-verification-otp", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ 
-            email,
-            type: "sign-in"
-          }),
+        // Send OTP using BetterAuth's built-in system
+        const { data: otpData, error: otpError } = await authClient.emailOtp.sendVerificationOtp({
+          email,
+          type: "sign-in"
         });
 
-        const otpData = await otpResponse.json();
-        
-        if (!otpResponse.ok) {
-          setError(otpData.message || "Failed to send code");
+        if (otpError) {
+          setError(otpError.message || "Failed to send code");
         } else {
           setCodeSent(true);
         }
       } else {
-        // Verify OTP using direct API call
-        const verifyResponse = await fetch("/api/auth/sign-in/email-otp", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ 
-            email, 
-            otp: code 
-          }),
+        // Verify OTP using BetterAuth's built-in system
+        const { data: signInData, error: signInError } = await authClient.signIn.emailOtp({
+          email,
+          otp: code,
         });
 
-        const verifyData = await verifyResponse.json();
-        
-        if (!verifyResponse.ok) {
-          setError(verifyData.message || "Invalid code");
+        if (signInError) {
+          setError(signInError.message || "Invalid code");
         } else {
           router.push("/dashboard");
         }

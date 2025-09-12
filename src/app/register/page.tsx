@@ -28,19 +28,20 @@ export default function RegisterPage() {
     }
 
     try {
-      // Instead of creating the user immediately, store the data temporarily
-      // and redirect to 2FA setup with the user data
-      const userData = {
+      // Use BetterAuth's built-in sign-up with email verification
+      const { data: signUpData, error: signUpError } = await authClient.signUp.email({
         email,
         password,
         name: name || "",
-      };
+      });
 
-      // Store user data in sessionStorage for the 2FA process
-      sessionStorage.setItem('pendingUserData', JSON.stringify(userData));
-      
-      // Redirect to 2FA setup with user data
-      router.push(`/login/2fa?setup=true&email=${encodeURIComponent(email)}`);
+      if (signUpError) {
+        setError(signUpError.message || "Failed to create account. Please try again.");
+        return;
+      }
+
+      // If sign-up successful, redirect to email verification page
+      router.push(`/login/2fa?verify=true&email=${encodeURIComponent(email)}`);
     } catch (err) {
       setError("An unexpected error occurred");
     } finally {

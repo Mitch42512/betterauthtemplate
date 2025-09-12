@@ -79,3 +79,15 @@ export const twoFactorBackupCodes = pgTable("twoFactorBackupCodes", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
+
+// OTP table - for email verification codes
+export const otp = pgTable("otp", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  email: varchar("email", { length: 255 }).notNull(),
+  code: varchar("code", { length: 10 }).notNull(), // 6-digit OTP
+  type: varchar("type", { length: 50 }).notNull(), // 'sign-in', 'sign-up', etc.
+  expiresAt: timestamp("expiresAt").notNull(),
+  used: boolean("used").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+});

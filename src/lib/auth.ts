@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { twoFactor, emailOTP } from "better-auth/plugins";
+import { emailOTP } from "better-auth/plugins";
 import { db } from "@/db"; // your Drizzle connection
 import * as schema from "@/db/schema";
 import { sendEmail, generateOTPEmailHTML } from "@/lib/email";
@@ -33,9 +33,6 @@ export const auth = betterAuth({
           console.log(`📧 FALLBACK - OTP ${otp} for ${email} (${type})`);
         }
       },
-    }),
-    twoFactor({
-      issuer: "Better Auth Template",
     }),
   ],
 });

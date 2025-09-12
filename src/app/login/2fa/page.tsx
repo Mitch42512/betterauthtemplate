@@ -16,7 +16,7 @@ export default function TwoFactorPage() {
   const [userExists, setUserExists] = useState(false);
   const router = useRouter();
 
-  // Check if this is a setup flow (user just registered) or verification flow (user logging in)
+  // Check if this is a verification flow (user just registered) or sign-in flow (user logging in)
   React.useEffect(() => {
     // Only run on client side
     if (typeof window === 'undefined') return;
@@ -31,40 +31,17 @@ export default function TwoFactorPage() {
       console.log('📧 Email set to:', emailParam);
     }
 
-    // If user is coming from registration, this is a setup flow
-    const isSetupFlow = window.location.search.includes('setup=true');
-    setIsSetup(isSetupFlow);
+    // If user is coming from registration, this is a verification flow
+    const isVerifyFlow = window.location.search.includes('verify=true');
+    setIsSetup(isVerifyFlow);
     
-    if (isSetupFlow) {
-      // Check if we have pending user data
-      const pendingUserData = sessionStorage.getItem('pendingUserData');
-      if (!pendingUserData) {
-        setError("No pending registration found. Please start the registration process again.");
-        return;
-      }
-      
-      // Set email from URL params
-      if (emailParam) {
-        setEmail(emailParam);
-      }
-    } else if (emailParam && !isSetupFlow) {
+    if (isVerifyFlow) {
+      // User was just created, now we need to verify their email
+      console.log('📧 User created, now verifying email');
+    } else if (emailParam && !isVerifyFlow) {
       // For login flow, check if user exists before proceeding
       checkUserExists(emailParam);
     }
-
-    // Cleanup function to handle page unload
-    const handleBeforeUnload = () => {
-      // Only clear pending data if it's a setup flow and user is leaving
-      if (isSetupFlow) {
-        sessionStorage.removeItem('pendingUserData');
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
   }, []);
 
   // Separate useEffect to send setup code when email is available
@@ -104,28 +81,23 @@ export default function TwoFactorPage() {
     setError("");
     
     try {
-
-      // Use custom email OTP endpoint for sign-up verification
-      const response = await fetch("/api/auth/email-otp/send-verification-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          email,
-          type: "sign-up"
-        }),
+      // Use BetterAuth's built-in email OTP system for email verification
+      console.log(`📧 Sending email verification OTP request for ${email}`);
+      const { data: otpData, error: otpError } = await authClient.emailOtp.sendVerificationOtp({
+        email,
+        type: "email-verification"
       });
 
-      const data = await response.json();
+      console.log(`📧 Send OTP response:`, otpData);
       
-      if (!response.ok) {
-        setError(data.error || "Failed to send verification code");
+      if (otpError) {
+        setError(otpError.message || "Failed to send verification code");
         return;
       }
 
       setCodeSent(true);
     } catch (err) {
+      console.error("Error sending email verification code:", err);
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
@@ -137,27 +109,23 @@ export default function TwoFactorPage() {
     setError("");
     
     try {
-      // Use custom email OTP endpoint for sign-in
-      const response = await fetch("/api/auth/email-otp/send-verification-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          email,
-          type: "sign-in"
-        }),
+      // Use BetterAuth's built-in email OTP system for sign-in
+      console.log(`📧 Sending sign-in OTP request for ${email}`);
+      const { data: otpData, error: otpError } = await authClient.emailOtp.sendVerificationOtp({
+        email,
+        type: "sign-in"
       });
 
-      const data = await response.json();
+      console.log(`📧 Send OTP response:`, otpData);
       
-      if (!response.ok) {
-        setError(data.error || "Failed to send verification code");
+      if (otpError) {
+        setError(otpError.message || "Failed to send verification code");
         return;
       }
 
       setCodeSent(true);
     } catch (err) {
+      console.error("Error sending sign-in code:", err);
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
@@ -179,58 +147,27 @@ export default function TwoFactorPage() {
       } else {
         // Verify code
         if (isSetup) {
-          // For setup flow, verify email OTP first
-          const verifyResponse = await fetch("/api/auth/email-otp/verify-otp", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ 
-              email,
-              otp: code,
-              type: "sign-up"
-            }),
+          // For verification flow, verify email OTP using BetterAuth's email verification
+          console.log(`🔍 Verifying email OTP: ${code}`);
+          
+          // Use BetterAuth's email verification endpoint
+          const { data: verifyData, error: verifyError } = await authClient.emailOtp.verifyEmail({
+            email,
+            otp: code,
           });
 
-          const verifyData = await verifyResponse.json();
+          console.log(`🔍 Verification response:`, verifyData);
           
-          if (!verifyResponse.ok || !verifyData.success) {
-            setError("Invalid verification code");
+          if (verifyError) {
+            console.log(`❌ Verification failed:`, verifyError);
+            setError(verifyError.message || "Invalid verification code");
             return;
           }
 
-          // Get pending user data from sessionStorage
-          const pendingUserData = sessionStorage.getItem('pendingUserData');
+          console.log(`✅ Email verification successful:`, verifyData);
           
-          if (pendingUserData) {
-            try {
-              const userData = JSON.parse(pendingUserData);
-              
-              // Now create the user in the database
-              const { data: signUpData, error: signUpError } = await authClient.signUp.email({
-                email: userData.email,
-                password: userData.password,
-                name: userData.name,
-              });
-
-              if (signUpError) {
-                setError("Failed to create user account. Please try again.");
-                return;
-              }
-
-              // Clear the pending user data
-              sessionStorage.removeItem('pendingUserData');
-              
-              // Redirect to dashboard
-              router.push("/dashboard");
-            } catch (err) {
-              setError("Failed to create user account. Please try again.");
-              return;
-            }
-          } else {
-            setError("Registration data not found. Please start over.");
-            return;
-          }
+          // Redirect to dashboard after successful verification
+          router.push("/dashboard");
         } else {
           // For normal 2FA verification, check if user exists first
           if (!userExists) {
@@ -239,37 +176,22 @@ export default function TwoFactorPage() {
             return;
           }
 
-          // Use custom email OTP for sign-in
-          const response = await fetch("/api/auth/email-otp/verify-otp", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ 
-              email,
-              otp: code,
-              type: "sign-in"
-            }),
-          });
-
-          const data = await response.json();
-          
-          if (!response.ok || !data.success) {
-            setError("Invalid verification code");
-            return;
-          }
-
-          // For sign-in, we need to actually sign in the user
-          const { data: signInData, error: signInError } = await authClient.signIn.email({
+          // Use BetterAuth's built-in OTP-based sign-in
+          console.log(`🔍 Signing in with OTP for ${email}: ${code}`);
+          const { data: signInData, error: signInError } = await authClient.signIn.emailOtp({
             email,
-            password: "dummy", // This won't be used since we're using OTP
+            otp: code,
           });
 
+          console.log(`🔍 Sign-in response:`, signInData);
+          
           if (signInError) {
-            setError("Failed to sign in. Please try again.");
+            console.log(`❌ Sign-in failed: ${signInError.message}`);
+            setError(signInError.message || "Invalid verification code");
             return;
           }
 
+          console.log(`✅ Sign-in successful:`, signInData);
           // Redirect to dashboard on successful verification
           router.push("/dashboard");
         }
