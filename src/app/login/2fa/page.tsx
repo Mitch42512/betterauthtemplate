@@ -18,11 +18,17 @@ export default function TwoFactorPage() {
 
   // Check if this is a setup flow (user just registered) or verification flow (user logging in)
   React.useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+
     // Get email from URL params
     const urlParams = new URLSearchParams(window.location.search);
     const emailParam = urlParams.get('email');
+    console.log('🔍 URL params:', window.location.search);
+    console.log('🔍 Email param:', emailParam);
     if (emailParam) {
       setEmail(emailParam);
+      console.log('📧 Email set to:', emailParam);
     }
 
     // If user is coming from registration, this is a setup flow
@@ -37,9 +43,9 @@ export default function TwoFactorPage() {
         return;
       }
       
-      if (!codeSent) {
-        // Automatically send the 2FA setup code
-        sendSetupCode();
+      // Set email from URL params
+      if (emailParam) {
+        setEmail(emailParam);
       }
     } else if (emailParam && !isSetupFlow) {
       // For login flow, check if user exists before proceeding
@@ -60,6 +66,15 @@ export default function TwoFactorPage() {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, []);
+
+  // Separate useEffect to send setup code when email is available
+  React.useEffect(() => {
+    console.log('🔍 2FA useEffect - isSetup:', isSetup, 'email:', email, 'codeSent:', codeSent);
+    if (isSetup && email && !codeSent) {
+      console.log('📧 Sending setup code for email:', email);
+      sendSetupCode();
+    }
+  }, [isSetup, email, codeSent]);
 
   const checkUserExists = async (userEmail: string) => {
     try {
@@ -83,16 +98,64 @@ export default function TwoFactorPage() {
       setError("An unexpected error occurred while verifying user");
     }
   };
-
+  
   const sendSetupCode = async () => {
     setIsLoading(true);
     setError("");
     
     try {
-      // For now, just simulate sending a code
-      // In a real implementation, you would need to enable 2FA first
-      console.log("🔐 2FA Setup Code: 123456");
-      console.log("📧 This would normally be sent via email");
+
+      // Use custom email OTP endpoint for sign-up verification
+      const response = await fetch("/api/auth/email-otp/send-verification-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          email,
+          type: "sign-up"
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        setError(data.error || "Failed to send verification code");
+        return;
+      }
+
+      setCodeSent(true);
+    } catch (err) {
+      setError("An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const sendSignInCode = async () => {
+    setIsLoading(true);
+    setError("");
+    
+    try {
+      // Use custom email OTP endpoint for sign-in
+      const response = await fetch("/api/auth/email-otp/send-verification-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          email,
+          type: "sign-in"
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        setError(data.error || "Failed to send verification code");
+        return;
+      }
+
       setCodeSent(true);
     } catch (err) {
       setError("An unexpected error occurred");
@@ -110,45 +173,63 @@ export default function TwoFactorPage() {
       if (isSetup && !codeSent) {
         // Send setup code
         await sendSetupCode();
+      } else if (!isSetup && !codeSent) {
+        // Send sign-in code
+        await sendSignInCode();
       } else {
         // Verify code
         if (isSetup) {
-          // For setup flow, use hardcoded code for testing
-          if (code === "123456") {
-            // Get pending user data from sessionStorage
-            const pendingUserData = sessionStorage.getItem('pendingUserData');
-            
-            if (pendingUserData) {
-              try {
-                const userData = JSON.parse(pendingUserData);
-                
-                // Now create the user in the database
-                const { data, error } = await authClient.signUp.email({
-                  email: userData.email,
-                  password: userData.password,
-                  name: userData.name,
-                });
+          // For setup flow, verify email OTP first
+          const verifyResponse = await fetch("/api/auth/email-otp/verify-otp", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ 
+              email,
+              otp: code,
+              type: "sign-up"
+            }),
+          });
 
-                if (error) {
-                  setError("Failed to create user account. Please try again.");
-                  return;
-                }
+          const verifyData = await verifyResponse.json();
+          
+          if (!verifyResponse.ok || !verifyData.success) {
+            setError("Invalid verification code");
+            return;
+          }
 
-                // Clear the pending user data
-                sessionStorage.removeItem('pendingUserData');
-                
-                // Redirect to dashboard
-                router.push("/dashboard");
-              } catch (err) {
+          // Get pending user data from sessionStorage
+          const pendingUserData = sessionStorage.getItem('pendingUserData');
+          
+          if (pendingUserData) {
+            try {
+              const userData = JSON.parse(pendingUserData);
+              
+              // Now create the user in the database
+              const { data: signUpData, error: signUpError } = await authClient.signUp.email({
+                email: userData.email,
+                password: userData.password,
+                name: userData.name,
+              });
+
+              if (signUpError) {
                 setError("Failed to create user account. Please try again.");
                 return;
               }
-            } else {
-              setError("Registration data not found. Please start over.");
+
+              // Clear the pending user data
+              sessionStorage.removeItem('pendingUserData');
+              
+              // Redirect to dashboard
+              router.push("/dashboard");
+            } catch (err) {
+              setError("Failed to create user account. Please try again.");
               return;
             }
           } else {
-            setError("Invalid verification code. Use 123456 for testing.");
+            setError("Registration data not found. Please start over.");
+            return;
           }
         } else {
           // For normal 2FA verification, check if user exists first
@@ -158,13 +239,39 @@ export default function TwoFactorPage() {
             return;
           }
 
-          // For now, use hardcoded verification for testing
-          // In a real implementation, you would use the Better Auth two-factor verification
-          if (code === "123456") {
-            router.push("/dashboard");
-          } else {
-            setError("Invalid verification code. Use 123456 for testing.");
+          // Use custom email OTP for sign-in
+          const response = await fetch("/api/auth/email-otp/verify-otp", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ 
+              email,
+              otp: code,
+              type: "sign-in"
+            }),
+          });
+
+          const data = await response.json();
+          
+          if (!response.ok || !data.success) {
+            setError("Invalid verification code");
+            return;
           }
+
+          // For sign-in, we need to actually sign in the user
+          const { data: signInData, error: signInError } = await authClient.signIn.email({
+            email,
+            password: "dummy", // This won't be used since we're using OTP
+          });
+
+          if (signInError) {
+            setError("Failed to sign in. Please try again.");
+            return;
+          }
+
+          // Redirect to dashboard on successful verification
+          router.push("/dashboard");
         }
       }
     } catch (err) {
@@ -272,13 +379,13 @@ export default function TwoFactorPage() {
           </div>
           <div className="ml-3">
             <h3 className="text-sm font-medium text-blue-800">
-              Development Mode
+              Email Verification
             </h3>
             <div className="mt-2 text-sm text-blue-700">
               <p>
                 {isSetup 
-                  ? "Check your browser console for the 6-digit setup code."
-                  : "Check your browser console for the 6-digit verification code."
+                  ? "Check your email for the 6-digit verification code. Also check the console for debugging info."
+                  : "Check your email for the 6-digit verification code. Also check the console for debugging info."
                 }
               </p>
             </div>

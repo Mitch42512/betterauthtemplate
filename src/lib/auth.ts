@@ -3,6 +3,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { twoFactor, emailOTP } from "better-auth/plugins";
 import { db } from "@/db"; // your Drizzle connection
 import * as schema from "@/db/schema";
+import { sendEmail, generateOTPEmailHTML } from "@/lib/email";
 
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET!,       // critical for security
@@ -11,36 +12,30 @@ export const auth = betterAuth({
   emailAndPassword: { enabled: true },            // basic email/password flow
   plugins: [
     emailOTP({
-      disableSignUp: true, // Prevent automatic user creation during email OTP
+      disableSignUp: false, // Allow email OTP for both sign-in and sign-up
       async sendVerificationOTP({ email, otp, type }) {
-        // For now, just log the code to console
-        // TODO: Replace with real email provider like Resend/SendGrid
-        console.log(`📧 Send OTP ${otp} to ${email} for ${type}`);
-        console.log(`📧 This would normally be sent via email to: ${email}`);
+        console.log(`📧 Sending OTP ${otp} to ${email} for ${type}`);
         
-        // In production, you would send the email here:
-        // await sendEmail({
-        //   to: email,
-        //   subject: "Your Login Code",
-        //   body: `Your verification code is: ${otp}`
-        // });
+        try {
+          const emailType = type === 'sign-in' ? 'sign-in' : 'sign-up';
+          const subject = type === 'sign-in' ? 'Your Login Verification Code' : 'Your Account Verification Code';
+          
+          await sendEmail({
+            to: email,
+            subject,
+            html: generateOTPEmailHTML(otp, emailType),
+          });
+          
+          console.log(`✅ Email sent successfully to ${email}`);
+        } catch (error) {
+          console.error(`❌ Failed to send email to ${email}:`, error);
+          // Still log to console as fallback for development
+          console.log(`📧 FALLBACK - OTP ${otp} for ${email} (${type})`);
+        }
       },
     }),
     twoFactor({
       issuer: "Better Auth Template",
-      sendCode: async ({ code, email }) => {
-        // For now, just log the code to console
-        // TODO: Replace with real email provider like Resend/SendGrid
-        console.log(`🔐 2FA Code for ${email}: ${code}`);
-        console.log(`📧 This would normally be sent via email to: ${email}`);
-        
-        // In production, you would send the email here:
-        // await sendEmail({
-        //   to: email,
-        //   subject: "Your 2FA Code",
-        //   body: `Your verification code is: ${code}`
-        // });
-      },
     }),
   ],
 });

@@ -74,13 +74,14 @@ export default function AuthCardLayout({ title, subtitle, additionalText, childr
                  </Link>
                  
                  <div className="w-full h-full rounded-4xl overflow-hidden relative">
-                   <Image
-                     src="/auth-image.png"
-                     alt="Authentication illustration"
-                     fill
-                     className="object-cover rounded-4xl"
-                     priority
-                   />
+                  <Image
+                    src="/auth-image.png"
+                    alt="Authentication illustration"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover rounded-4xl"
+                    priority
+                  />
                  </div>
                </div>
         </div>
