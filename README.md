@@ -38,15 +38,13 @@ A production-ready authentication template built with Next.js, Better Auth, Driz
    ```
 
 2. **Set up environment variables:**
-   Create a `.env.local` file in the root directory:
+   Copy the example file and update the values:
    ```bash
-   # Database connection
-   DATABASE_URL=postgresql://postgres:password@localhost:5432/betterauthtemplate
-   
-   # Better Auth Configuration
-   BETTER_AUTH_SECRET=your-super-secret-key-here-change-this-in-production
-   BETTER_AUTH_URL=http://localhost:3000
+   cp .env.example .env.local
    ```
+   Then edit `.env.local` and replace the placeholder values for variables like
+   `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`,
+   `NEXT_PUBLIC_BETTER_AUTH_URL`, `RESEND_API_KEY`, and `RESEND_FROM_EMAIL`.
 
 3. **Set up the database:**
    ```bash
