@@ -1,9 +1,7 @@
 import { Resend } from 'resend';
+import { serverEnv, isEmailConfigured } from '@/lib/env-server';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-// Check if email service is properly configured
-const isEmailConfigured = process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL;
+const resend = new Resend(serverEnv.RESEND_API_KEY);
 
 export interface EmailOptions {
   to: string;
@@ -13,7 +11,7 @@ export interface EmailOptions {
 
 export async function sendEmail({ to, subject, html }: EmailOptions) {
   // If email service is not configured, log to console for development
-  if (!isEmailConfigured) {
+  if (!isEmailConfigured()) {
     console.log('📧 Email service not configured. Logging email instead:');
     console.log(`To: ${to}`);
     console.log(`Subject: ${subject}`);
@@ -24,7 +22,7 @@ export async function sendEmail({ to, subject, html }: EmailOptions) {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL!,
+      from: serverEnv.RESEND_FROM_EMAIL!,
       to,
       subject,
       html,
