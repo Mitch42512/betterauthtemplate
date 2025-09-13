@@ -1,11 +1,12 @@
 import { eq } from 'drizzle-orm';
 import { db } from './index';
 import { user, account } from './schema';
+import { nanoid } from 'nanoid';
 
 // Example database operations
-export async function createUser(id: string, email: string, name?: string) {
+export async function createUser(email: string, name?: string) {
   const [newUser] = await db.insert(user).values({
-    id,
+    id: nanoid(),
     email,
     name,
   }).returning();

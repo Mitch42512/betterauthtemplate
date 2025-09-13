@@ -4,10 +4,11 @@ import { emailOTP } from "better-auth/plugins";
 import { db } from "@/db"; // your Drizzle connection
 import * as schema from "@/db/schema";
 import { sendEmail, generateOTPEmailHTML } from "@/lib/email";
+import { serverEnv } from "@/lib/env-server";
 
 export const auth = betterAuth({
-  secret: process.env.BETTER_AUTH_SECRET!,       // critical for security
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  secret: serverEnv.BETTER_AUTH_SECRET,       // critical for security
+  baseURL: serverEnv.BETTER_AUTH_URL,
   database: drizzleAdapter(db, { provider: "pg", schema }),
   emailAndPassword: { enabled: true },            // basic email/password flow
   plugins: [
