@@ -24,14 +24,14 @@ export default function FloatingPill({ onScrollToFeatures, className = "" }: Flo
   if (!showFloatingPill) return null;
 
   return (
-    <div className={`fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 ${className}`}>
+    <div className={`fixed bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 z-50 ${className}`}>
       <button
         onClick={onScrollToFeatures}
-        className="bg-white/90 backdrop-blur-sm text-gray-800 px-6 py-3 rounded-full shadow-lg border border-gray-200 hover:bg-white hover:shadow-xl transition-all duration-300 flex items-center gap-2 group"
+        className="bg-white/90 backdrop-blur-sm text-gray-800 px-4 sm:px-6 py-2 sm:py-3 rounded-full shadow-lg border border-gray-200 hover:bg-white hover:shadow-xl transition-all duration-300 flex items-center gap-1 sm:gap-2 group"
       >
-        <span className="font-medium">See Features</span>
+        <span className="font-medium text-sm sm:text-base">See Features</span>
         <svg 
-          className="w-4 h-4 transition-transform duration-300 group-hover:translate-y-0.5" 
+          className="w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-300 group-hover:translate-y-0.5" 
           fill="none" 
           stroke="currentColor" 
           viewBox="0 0 24 24"

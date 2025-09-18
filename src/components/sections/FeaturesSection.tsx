@@ -74,20 +74,20 @@ interface FeaturesSectionProps {
 
 export default function FeaturesSection({ className = "" }: FeaturesSectionProps) {
   return (
-    <div id="features-section" className={`relative z-10 py-16 ${className}`}>
-      {/* CSS Grid Container - Two equal columns with snaking pattern */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 max-w-7xl mx-auto px-8">
+    <div id="features-section" className={`relative z-10 py-8 sm:py-12 lg:py-16 ${className}`}>
+      {/* Mobile: Single column, Desktop: Two equal columns with snaking pattern */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
         
         {/* Left Column - Features 1 & 3 */}
         <div className="flex flex-col">
           <FeatureCard {...features[0]} />
-          <FeatureCard {...features[2]} className="mt-34" />
+          <FeatureCard {...features[2]} className="mt-0 lg:mt-8 xl:mt-34" />
         </div>
 
         {/* Right Column - Features 2 & 4 */}
         <div className="flex flex-col">
-          <FeatureCard {...features[1]} className="mt-50" />
-          <FeatureCard {...features[3]} className="mt-50" />
+          <FeatureCard {...features[1]} className="mt-0 lg:mt-8 xl:mt-50" />
+          <FeatureCard {...features[3]} className="mt-0 lg:mt-8 xl:mt-50" />
         </div>
       </div>
     </div>

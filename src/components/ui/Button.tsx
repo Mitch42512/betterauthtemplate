@@ -25,15 +25,15 @@ export default function Button({
   };
   
   const sizeClasses = {
-    sm: "px-4 py-2 text-sm rounded-full",
-    md: "px-6 py-3 text-base rounded-full",
-    lg: "px-8 py-4 text-lg rounded-full"
+    sm: "px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-full",
+    md: "px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base rounded-full",
+    lg: "px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg rounded-full"
   };
   
   const heightClasses = {
-    sm: "h-8",
-    md: "h-12", 
-    lg: "h-14"
+    sm: "h-8 sm:h-9",
+    md: "h-10 sm:h-12", 
+    lg: "h-12 sm:h-14"
   };
 
   return (
