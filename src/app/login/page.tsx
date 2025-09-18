@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import AuthCardLayout from "@/components/AuthCardLayout";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
+import Alert from "@/components/ui/Alert";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -115,65 +118,39 @@ export default function LoginPage() {
       <div className="space-y-6">
         {/* Email + Password Form */}
         <form className="space-y-6" onSubmit={handlePasswordSubmit}>
-          <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              className="w-full h-12 rounded-full bg-gray-100 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              placeholder=""
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            label="Email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
           
-          <div className="space-y-2">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
-                required
-                className="w-full h-12 rounded-full bg-gray-100 px-4 pr-12 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                placeholder=""
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                  </svg>
-                )}
-              </button>
-            </div>
-          </div>
+          <Input
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            label="Password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            showPasswordToggle
+            onTogglePassword={() => setShowPassword(!showPassword)}
+            showPassword={showPassword}
+          />
 
-          <button
+          <Button
             type="submit"
             disabled={isLoading}
-            className="w-full h-12 rounded-full bg-yellow-400 hover:bg-yellow-500 text-white font-semibold focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            isLoading={isLoading}
+            className="w-full"
           >
             {isLoading ? "Signing in..." : "Submit"}
-          </button>
+          </Button>
         </form>
 
         {/* Or Divider */}
@@ -188,59 +165,48 @@ export default function LoginPage() {
 
         {/* Email Code Form */}
         <form className="space-y-6" onSubmit={handlePasswordlessSubmit}>
-          <div className="space-y-2">
-            <label htmlFor="email-code" className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
-              id="email-code"
-              name="email-code"
-              type="email"
-              autoComplete="email"
-              required
-              className="w-full h-12 rounded-full bg-gray-100 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              placeholder=""
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+          <Input
+            id="email-code"
+            name="email-code"
+            type="email"
+            label="Email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
           
           {codeSent && (
-            <div className="space-y-2">
-              <label htmlFor="code" className="block text-sm font-medium text-gray-700">
-                Verification Code
-              </label>
-              <input
-                id="code"
-                name="code"
-                type="text"
-                autoComplete="one-time-code"
-                required
-                className="w-full h-12 rounded-full bg-gray-100 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                placeholder=""
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                maxLength={6}
-              />
-            </div>
+            <Input
+              id="code"
+              name="code"
+              type="text"
+              label="Verification Code"
+              autoComplete="one-time-code"
+              required
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              maxLength={6}
+            />
           )}
 
-          <button
+          <Button
             type="submit"
             disabled={isLoading}
-            className="w-full h-12 rounded-full bg-yellow-400 hover:bg-yellow-500 text-white font-semibold focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            isLoading={isLoading}
+            className="w-full"
           >
             {isLoading 
               ? (codeSent ? "Verifying..." : "Sending code...") 
               : (codeSent ? "Verify code" : "Send code")
             }
-          </button>
+          </Button>
         </form>
 
         {error && (
-          <div className="rounded-md bg-red-50 p-4">
-            <div className="text-sm text-red-700">{error}</div>
-          </div>
+          <Alert type="error">
+            {error}
+          </Alert>
         )}
       </div>
     </AuthCardLayout>

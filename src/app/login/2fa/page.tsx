@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import AuthCardLayout from "@/components/AuthCardLayout";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
+import Alert from "@/components/ui/Alert";
 
 export default function TwoFactorPage() {
   const [code, setCode] = useState("");
@@ -235,51 +238,48 @@ export default function TwoFactorPage() {
       }
     >
       <form className="space-y-6" onSubmit={handleSubmit}>
-        <div className="space-y-2">
-          <label htmlFor="code" className="block text-sm font-medium text-gray-700">
-            Verification Code
-          </label>
-          <input
-            id="code"
-            name="code"
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            maxLength={6}
-            required
-            className="w-full h-12 rounded-full bg-gray-100 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-center text-2xl font-mono tracking-widest"
-            placeholder=""
-            value={code}
-            onChange={handleCodeChange}
-          />
-        </div>
+        <Input
+          id="code"
+          name="code"
+          type="text"
+          label="Verification Code"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          maxLength={6}
+          required
+          value={code}
+          onChange={handleCodeChange}
+          className="text-center text-2xl font-mono tracking-widest"
+        />
 
         {error && (
-          <div className="rounded-md bg-red-50 p-4">
-            <div className="text-sm text-red-700">{error}</div>
-          </div>
+          <Alert type="error">
+            {error}
+          </Alert>
         )}
 
         <div className="space-y-3">
-          <button
+          <Button
             type="submit"
             disabled={isLoading || (codeSent && code.length !== 6) || (!isSetup && !userExists)}
-            className="w-full h-12 rounded-full bg-yellow-400 hover:bg-yellow-500 text-white font-semibold focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            isLoading={isLoading}
+            className="w-full"
           >
             {isLoading 
               ? (isSetup && !codeSent ? "Sending code..." : "Verifying...") 
               : (isSetup && !codeSent ? "Send Code" : "Submit")
             }
-          </button>
+          </Button>
           
           {isSetup && (
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={handleCancel}
-              className="w-full h-12 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+              className="w-full"
             >
               Cancel Registration
-            </button>
+            </Button>
           )}
         </div>
       </form>
